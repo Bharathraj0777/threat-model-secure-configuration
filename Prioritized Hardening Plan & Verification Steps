@@ -1,0 +1,21 @@
+Phase 1: Critical Authorizations & Auth Gates (Immediate / Sprint 1)
+
+Enforce Tenant Context in All Queries: Bind every database read/write query directly to the session's verified tenant_id in the ORM layer rather than trusting client-supplied IDs.
+
+Verification Step: Attempt to query document records with a mismatched tenant_id token via Postman; verify that a 403 Forbidden response is returned.
+
+Rate Limiting & MFA: Implement rate limiting (max 5 attempts/minute per IP) on /auth/login and require time-based one-time password (TOTP) MFA for administrative actions.
+
+Phase 2: Input Sanitization & Boundary Isolation (Sprint 2)
+
+Schema Validation & Role Whitelisting: Use strict schema parsers (like Zod) to drop unexpected fields (role, is_admin) from user input payloads.
+
+Verification Step: Send an update request containing role: "admin" as a standard user and check database logs to confirm the extra field was stripped.
+
+SSRF Defense: Disable HTTP redirects on outbound webhook workers and block private IP ranges (RFC 1918 and link-local ranges).
+
+Phase 3: Client-Side Security & Logging (Sprint 3)
+
+Content Security Policy (CSP) & Sanitization: Sanitize rendered HTML using DOMPurify and configure strict HTTP response headers (Content-Security-Policy: default-src 'self').
+
+Tamper-Resistant Logging: Stream structured JSON audit logs directly to an external write-only logging target (e.g., AWS CloudWatch).
